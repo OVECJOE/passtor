@@ -1,34 +1,64 @@
-/**
- * Some predefined delay values (in milliseconds).
- */
-export enum Delays {
-  Short = 500,
-  Medium = 2000,
-  Long = 5000,
+import { POptions } from "./types.js";
+
+class PasswordGenerator {
+  private readonly _options = {
+    length: 16,
+    uppercase: true,
+    lowercase: true,
+    numbers: true,
+    symbols: true
+  }
+
+  public get options(): Readonly<POptions> {
+    return this.options;
+  }
+
+  constructor(options?: Partial<POptions>) {
+    Object.assign(this._options, options);
+  }
+
+  private get ascii(): string {
+    let ascii = "";
+
+    if (this._options.uppercase) {
+      ascii += "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    }
+
+    if (this._options.lowercase) {
+      ascii += "abcdefghijklmnopqrstuvwxyz";
+    }
+
+    if (this._options.numbers) {
+      ascii += "0123456789";
+    }
+
+    if (this._options.symbols) {
+      ascii += "!@#$%^&*()_+-=[]{};:,.<>?";
+    }
+
+    // shuffle the ascii characters
+    ascii = ascii.split("").sort(() => Math.random() - 0.5).join("");
+
+    return ascii;
+  }
+
+  private get randomIndex(): number {
+    return Math.floor(Math.random() * this.ascii.length);
+  }
+
+  private get randomChar(): string {
+    return this.ascii[this.randomIndex];
+  }
+
+  public generate(): string {
+    const password = new Array(this._options.length);
+
+    for (let i = 0; i < this._options.length; i++) {
+      password[i] = this.randomChar;
+    }
+
+    return password.join("");
+  }
 }
 
-/**
- * Returns a Promise<string> that resolves after a given time.
- *
- * @param {string} name - A name.
- * @param {number=} [delay=Delays.Medium] - A number of milliseconds to delay resolution of the Promise.
- * @returns {Promise<string>}
- */
-function delayedHello(
-  name: string,
-  delay: number = Delays.Medium,
-): Promise<string> {
-  return new Promise((resolve: (value?: string) => void) =>
-    setTimeout(() => resolve(`Hello, ${name}`), delay),
-  );
-}
-
-// Please see the comment in the .eslintrc.json file about the suppressed rule!
-// Below is an example of how to use ESLint errors suppression. You can read more
-// at https://eslint.org/docs/latest/user-guide/configuring/rules#disabling-rules
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-export async function greeter(name: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-  // The name parameter should be of type string. Any is used only to trigger the rule.
-  return await delayedHello(name, Delays.Long);
-}
+export default PasswordGenerator;

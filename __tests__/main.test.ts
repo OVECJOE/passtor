@@ -1,42 +1,39 @@
-import { Delays, greeter } from '../src/main.js';
+import PasswordGenerator from "../src/main.js";
 
-describe('greeter function', () => {
-  const name = 'John';
-  let hello: string;
+describe("PasswordGenerator", () => {
+  test("should generate a password with default options", () => {
+    const generator = new PasswordGenerator();
+    const password = generator.generate();
 
-  let timeoutSpy: jest.SpyInstance;
-
-  // Act before assertions
-  beforeAll(async () => {
-    // Read more about fake timers
-    // http://facebook.github.io/jest/docs/en/timer-mocks.html#content
-    // Jest 27 now uses "modern" implementation of fake timers
-    // https://jestjs.io/blog/2021/05/25/jest-27#flipping-defaults
-    // https://github.com/facebook/jest/pull/5171
-    jest.useFakeTimers();
-    timeoutSpy = jest.spyOn(global, 'setTimeout');
-
-    const p: Promise<string> = greeter(name);
-    jest.runOnlyPendingTimers();
-    hello = await p;
+    expect(password.length).toBe(16);
+    expect(generator.options.uppercase).toBe(true);
+    expect(generator.options.lowercase).toBe(true);
+    expect(generator.options.numbers).toBe(true);
+    expect(generator.options.symbols).toBe(true);
   });
 
-  // Teardown (cleanup) after assertions
-  afterAll(() => {
-    timeoutSpy.mockRestore();
+  test("should generate a password with custom options", () => {
+    const generator = new PasswordGenerator({
+      length: 8,
+      uppercase: false,
+      lowercase: false,
+      numbers: false,
+      symbols: false
+    });
+
+    const password = generator.generate();
+
+    expect(password.length).toBe(8);
+    expect(generator.options.uppercase).toBe(false);
+    expect(generator.options.lowercase).toBe(false);
+    expect(generator.options.numbers).toBe(false);
+    expect(generator.options.symbols).toBe(false);
   });
 
-  // Assert if setTimeout was called properly
-  it('delays the greeting by 2 seconds', () => {
-    expect(setTimeout).toHaveBeenCalledTimes(1);
-    expect(setTimeout).toHaveBeenLastCalledWith(
-      expect.any(Function),
-      Delays.Long,
-    );
-  });
+  test("should return a string representation of the password", () => {
+    const generator = new PasswordGenerator();
+    const password = generator.generate();
 
-  // Assert greeter result
-  it('greets a user with `Hello, {name}` message', () => {
-    expect(hello).toBe(`Hello, ${name}`);
+    expect(typeof password.toString()).toBe("string");
   });
 });
